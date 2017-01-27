@@ -1,8 +1,8 @@
 package wordseg
 
 import (
-	"regexp"
 	"strings"
+	"unicode"
 
 	"github.com/chonla/go-trie/trie"
 )
@@ -16,8 +16,6 @@ type IDict interface {
 	Clear()
 	Depth() int
 }
-
-var thaiRegexp = regexp.MustCompile("^[กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮะาิีึืุูโไใำเแฯๆัํ่้๊๋็์]+$")
 
 // Seg is segmentor
 type Seg struct {
@@ -134,5 +132,10 @@ func (s *Seg) segmentThai(t string) []string {
 }
 
 func (s *Seg) isThai(t string) bool {
-	return thaiRegexp.MatchString(t)
+	for _, r := range []rune(t) {
+		if !unicode.In(r, unicode.Thai) {
+			return false
+		}
+	}
+	return true
 }
