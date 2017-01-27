@@ -17,6 +17,8 @@ type IDict interface {
 	Depth() int
 }
 
+var thaiRegexp = regexp.MustCompile("^[กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮะาิีึืุูโไใำเแฯๆัํ่้๊๋็์]+$")
+
 // Seg is segmentor
 type Seg struct {
 	Dict IDict
@@ -132,6 +134,5 @@ func (s *Seg) segmentThai(t string) []string {
 }
 
 func (s *Seg) isThai(t string) bool {
-	r := regexp.MustCompile("^[กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮะาิีึืุูโไใำเแฯๆัํ่้๊๋็์]+$")
-	return r.MatchString(t)
+	return thaiRegexp.MatchString(t)
 }
