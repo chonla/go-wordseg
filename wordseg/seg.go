@@ -132,7 +132,8 @@ func (s *Seg) segmentThai(t string) []string {
 }
 
 func (s *Seg) isThai(t string) bool {
-	for _, r := range []rune(t) {
+	rt := []rune(t)
+	for _, r := range rt {
 		if !unicode.In(r, unicode.Thai) {
 			return false
 		}
