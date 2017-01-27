@@ -1,6 +1,7 @@
 package wordseg
 
 import (
+	"bytes"
 	"strings"
 	"unicode"
 
@@ -35,6 +36,11 @@ func (s *Seg) UseDictFile(f string) error {
 	return s.Dict.LoadFile(f)
 }
 
+// UseDictData to load dictionary from string set
+func (s *Seg) UseDictData(ta []string) {
+	s.Dict.LoadStringSet(ta)
+}
+
 // Clear to clean up dictionary
 func (s *Seg) Clear() {
 	s.Dict.Clear()
@@ -63,30 +69,32 @@ func (s *Seg) SegmentText(t string) []string {
 func (s *Seg) groupText(t string) []string {
 	b := []rune(t)
 	out := []string{}
-	buff := ""
+	var buf bytes.Buffer
 	isthai := false
 	for _, a := range b {
 		c := string(a)
 		if s.isThai(c) {
 			if isthai {
-				buff += c
+				buf.WriteString(c)
 			} else {
-				out = append(out, buff)
-				buff = c
+				out = append(out, buf.String())
+				buf.Reset()
+				buf.WriteString(c)
 				isthai = true
 			}
 		} else {
 			if isthai {
-				out = append(out, buff)
-				buff = c
+				out = append(out, buf.String())
+				buf.Reset()
+				buf.WriteString(c)
 				isthai = false
 			} else {
-				buff += c
+				buf.WriteString(c)
 			}
 		}
 	}
-	if len(buff) > 0 {
-		out = append(out, buff)
+	if buf.Len() > 0 {
+		out = append(out, buf.String())
 	}
 	return out
 }
@@ -94,7 +102,7 @@ func (s *Seg) groupText(t string) []string {
 // segmentThai is to segment a text containing non whitespace
 func (s *Seg) segmentThai(t string) []string {
 	b := []rune(t)
-	buf := ""
+	var buf bytes.Buffer
 	bufsize := 0
 	out := []string{}
 	l := len(b)
@@ -104,11 +112,11 @@ func (s *Seg) segmentThai(t string) []string {
 	for cursor := 0; cursor < l; cursor++ {
 		c := string(b[cursor])
 
-		buf += c
+		buf.WriteString(c)
 		bufsize++
 
 		if bufsize <= depth {
-			if s.Dict.Has(buf) {
+			if s.Dict.Has(buf.String()) {
 				recentCheckpoint = cursor
 			}
 
@@ -122,7 +130,7 @@ func (s *Seg) segmentThai(t string) []string {
 	flushBuffer:
 		w := string(b[lastCheckpoint : recentCheckpoint+1])
 		out = append(out, w)
-		buf = ""
+		buf.Reset()
 		bufsize = 0
 		cursor = recentCheckpoint
 		lastCheckpoint = recentCheckpoint + 1

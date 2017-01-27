@@ -49,6 +49,17 @@ func TestAssignDictionaryFile(t *testing.T) {
 	d.AssertCalled(t, "LoadFile", f)
 }
 
+func TestAssignDictionaryData(t *testing.T) {
+	d := new(MockObject)
+	d.On("LoadStringSet", mock.AnythingOfType("[]string"))
+
+	ta := []string{"test", "data"}
+	s := NewSeg(d)
+	s.UseDictData(ta)
+
+	d.AssertCalled(t, "LoadStringSet", ta)
+}
+
 func TestCleanUp(t *testing.T) {
 	d := new(MockObject)
 	d.On("Clear")
@@ -68,11 +79,22 @@ func TestEmptyDictShouldReturnIdenticalStringInArray(t *testing.T) {
 	assert.Equal(t, []string{"test"}, r)
 }
 
-func Benchmark_Seg_isThai(b *testing.B) {
+func Benchmark_isThai(b *testing.B) {
 	word := "สวัสดี"
 
 	s := NewSeg(nil)
 	for i := 0; i < b.N; i++ {
 		s.isThai(word)
+	}
+}
+
+func Benchmark_SegmentThai(b *testing.B) {
+	word := "สวัสดี"
+
+	s := NewSeg(nil)
+	s.UseDictData([]string{"สวัสดี"})
+
+	for i := 0; i < b.N; i++ {
+		s.segmentThai(word)
 	}
 }
