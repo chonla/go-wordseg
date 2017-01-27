@@ -71,8 +71,8 @@ func TestEmptyDictShouldReturnIdenticalStringInArray(t *testing.T) {
 func Benchmark_Seg_isThai(b *testing.B) {
 	word := "สวัสดี"
 
+	s := NewSeg(nil)
 	for i := 0; i < b.N; i++ {
-		s := new(Seg)
 		s.isThai(word)
 	}
 }
