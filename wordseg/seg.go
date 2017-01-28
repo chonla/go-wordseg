@@ -53,7 +53,11 @@ func (s *Seg) SegmentText(t string) []string {
 
 	for _, ti := range ts {
 		if s.isThai(ti) {
-			out = append(out, s.segmentThai(ti)...)
+			if s.Dict.Depth() > 0 {
+				out = append(out, s.segmentThai(ti)...)
+			} else {
+				out = append(out, ti)
+			}
 		} else {
 			buf := strings.Trim(ti, " ")
 			if len(buf) > 0 {
@@ -77,8 +81,10 @@ func (s *Seg) groupText(t string) []string {
 			if isthai {
 				buf.WriteString(c)
 			} else {
-				out = append(out, buf.String())
-				buf.Reset()
+				if buf.Len() > 0 {
+					out = append(out, buf.String())
+					buf.Reset()
+				}
 				buf.WriteString(c)
 				isthai = true
 			}

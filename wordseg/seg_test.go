@@ -79,6 +79,15 @@ func TestEmptyDictShouldReturnIdenticalStringInArray(t *testing.T) {
 	assert.Equal(t, []string{"test"}, r)
 }
 
+func TestEmptyDictShouldReturnIdenticalThaiStringInArray(t *testing.T) {
+	s := NewSeg(nil)
+	defer s.Clear()
+
+	r := s.SegmentText("ทดสอบ")
+
+	assert.Equal(t, []string{"ทดสอบ"}, r)
+}
+
 func Benchmark_isThai(b *testing.B) {
 	word := "สวัสดี"
 
