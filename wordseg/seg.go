@@ -126,7 +126,18 @@ func (s *Seg) segmentThai(t string) []string {
 				recentCheckpoint = cursor
 			}
 
-			if cursor == l-1 {
+			if cursor >= l-1 {
+				if recentCheckpoint <= lastCheckpoint {
+					recentCheckpoint = cursor
+				}
+				goto flushBuffer
+			}
+
+			continue
+		} else {
+			recentCheckpoint = cursor
+
+			if cursor >= l-1 {
 				goto flushBuffer
 			}
 

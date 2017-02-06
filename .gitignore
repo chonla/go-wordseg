@@ -1,2 +1,5 @@
 coverage.sh
 .cover/
+main.go
+debug
+.vscode/
