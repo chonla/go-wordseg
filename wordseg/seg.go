@@ -2,7 +2,6 @@ package wordseg
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"unicode"
 
@@ -121,8 +120,6 @@ func (s *Seg) segmentThai(t string) []string {
 
 		buf.WriteString(c)
 		bufsize++
-
-		fmt.Println(buf.String())
 
 		if bufsize <= depth {
 			if s.Dict.Has(buf.String()) {
