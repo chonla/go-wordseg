@@ -1,0 +1,12 @@
+package: go-wordseg
+import:
+- package: github.com/chonla/go-trie
+  version: "0.1"
+  subpackages:
+  - trie
+testImport:
+- package: github.com/stretchr/testify
+  version: v1.1.4
+  subpackages:
+  - assert
+  - mock

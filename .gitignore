@@ -3,3 +3,5 @@ coverage.sh
 main.go
 debug
 .vscode/
+vendor
+glide.lock
