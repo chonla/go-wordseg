@@ -8,6 +8,13 @@ import (
 	"github.com/chonla/go-trie/trie"
 )
 
+const (
+	// AlgoLongest is Longest Matching
+	AlgoLongest = 0
+	// AlgoMaximum is Maximum Matching
+	AlgoMaximum = 1
+)
+
 // IDict is dictionary interface
 type IDict interface {
 	LoadString(t string)
@@ -21,6 +28,7 @@ type IDict interface {
 // Seg is segmentor
 type Seg struct {
 	Dict IDict
+	Algo int
 }
 
 // NewSeg create a new Seg
@@ -28,7 +36,7 @@ func NewSeg(d IDict) *Seg {
 	if d == nil {
 		d = trie.NewDict()
 	}
-	return &Seg{Dict: d}
+	return &Seg{Dict: d, Algo: AlgoLongest}
 }
 
 // UseDictFile to load dictionary file
@@ -54,7 +62,8 @@ func (s *Seg) SegmentText(t string) []string {
 	for _, ti := range ts {
 		if s.isThai(ti) {
 			if s.Dict.Depth() > 0 {
-				out = append(out, s.segmentThai(ti)...)
+				res := s.segmentThai(ti)
+				out = append(out, res...)
 			} else {
 				out = append(out, ti)
 			}
@@ -107,6 +116,50 @@ func (s *Seg) groupText(t string) []string {
 
 // segmentThai is to segment a text containing non whitespace
 func (s *Seg) segmentThai(t string) []string {
+	if s.Algo == AlgoLongest {
+		return s.segmentThaiLongest(t)
+	}
+	if s.Algo == AlgoMaximum {
+		return s.segmentThaiMaximum(t)
+	}
+	return []string{t}
+}
+
+// segmentThaiMaximum is to segment a text containing non whitespace
+func (s *Seg) segmentThaiMaximum(t string) []string {
+	/*
+		b := []rune(t)
+		var buf bytes.Buffer
+		bufsize := 0
+		out := []string{}
+		l := len(b)
+		depth := s.Dict.Depth()
+		safe := []int{}
+
+			for cursor := 0; cursor < l; cursor++ {
+				c := string(b[cursor])
+
+				buf.WriteString(c)
+				bufsize++
+
+				if bufsize <= depth {
+					if s.Dict.Has(buf.String()) {
+						safe = append(safe, cursor)
+					} else {
+					}
+				} else {
+
+				}
+			}
+		return out
+	*/
+
+	// Maximum matching is not ready yet
+	return []string{t}
+}
+
+// segmentThaiLongest is to segment a text containing non whitespace
+func (s *Seg) segmentThaiLongest(t string) []string {
 	b := []rune(t)
 	var buf bytes.Buffer
 	bufsize := 0

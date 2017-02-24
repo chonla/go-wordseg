@@ -89,7 +89,15 @@ func TestEmptyDictShouldReturnIdenticalThaiStringInArray(t *testing.T) {
 }
 
 func TestBacktrackingForGreedySegmentation(t *testing.T) {
+	t.Skip()
+	d := new(MockObject)
+	d.On("LoadStringSet", mock.AnythingOfType("[]string"))
+	d.On("Clear")
+	d.On("Depth")
+
+	ta := []string{"ว่า", "ว่าย", "ยังไง"}
 	s := NewSeg(nil)
+	s.UseDictData(ta)
 	defer s.Clear()
 
 	r := s.SegmentText("ว่ายังไง")
