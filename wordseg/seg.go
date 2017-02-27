@@ -160,19 +160,23 @@ func (s *Seg) segmentThaiMaximum(t string) []string {
 
 // segmentThaiLongest is to segment a text containing non whitespace
 func (s *Seg) segmentThaiLongest(t string) []string {
-	b := []rune(t)
+	//b := []rune(t)
 	var buf bytes.Buffer
 	bufsize := 0
 	out := []string{}
-	l := len(b)
+	//l := len(b)
 	recentCheckpoint := 0
 	lastCheckpoint := 0
 	depth := s.Dict.Depth()
+
+	cluster := s.createCluster(t)
+	l := len(cluster)
+
 	for cursor := 0; cursor < l; cursor++ {
-		c := string(b[cursor])
+		c := cluster[cursor] //string(b[cursor])
 
 		buf.WriteString(c)
-		bufsize++
+		bufsize += len(c)
 
 		if bufsize <= depth {
 			if s.Dict.Has(buf.String()) {
@@ -202,15 +206,50 @@ func (s *Seg) segmentThaiLongest(t string) []string {
 		}
 
 	flushBuffer:
-		w := string(b[lastCheckpoint : recentCheckpoint+1])
+		w := strings.Join(cluster[lastCheckpoint:recentCheckpoint], "") //string(b[lastCheckpoint : recentCheckpoint+1])
 		out = append(out, w)
 		buf.Reset()
 		bufsize = 0
-		cursor = recentCheckpoint
-		lastCheckpoint = recentCheckpoint + 1
+		cursor = recentCheckpoint + 1
+		lastCheckpoint = recentCheckpoint
 	}
 
 	return out
+}
+
+func (s *Seg) createCluster(t string) []string {
+	// เ แ โ ใ ไ ไม้หันอากาศ
+	needFollowingChar := []string{"\u0e40", "\u0e41", "\u0e42", "\u0e43", "\u0e44", "\u0e31"}
+	// ะ ไม้หันอากาศ า ำ สระอิ สระอี สระอึ สระอือ สระอุ สระอู สระอาหางยาว ไม้ไต่คู้ ไม้เอก ไม้โท ไม้ตรี ไม้จัตวา ทันฑฆาต
+	needPrecedingChar := []string{"\u0e30", "\u0e31", "\u0e32", "\u0e33", "\u0e34", "\u0e35", "\u0e36", "\u0e37", "\u0e38", "\u0e39", "\u0e45", "\u0e47", "\u0e48", "\u0e49", "\u0e4a", "\u0e4b", "\u0e4c"}
+
+	b := []rune(t)
+	var buf bytes.Buffer
+	l := len(b)
+	for cursor := 0; cursor < l; cursor++ {
+		c := string(b[cursor])
+
+		if s.isInGroup(c, needPrecedingChar) {
+			buf.WriteString("<")
+		}
+
+		buf.WriteString(c)
+
+		if !s.isInGroup(c, needFollowingChar) {
+			buf.WriteString(" ")
+		}
+	}
+
+	return strings.Split(strings.Replace(buf.String(), " <", "", -1), " ")
+}
+
+func (s *Seg) isInGroup(c string, g []string) bool {
+	for _, v := range g {
+		if v == c {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Seg) isThai(t string) bool {
