@@ -160,11 +160,9 @@ func (s *Seg) segmentThaiMaximum(t string) []string {
 
 // segmentThaiLongest is to segment a text containing non whitespace
 func (s *Seg) segmentThaiLongest(t string) []string {
-	//b := []rune(t)
 	var buf bytes.Buffer
 	bufsize := 0
 	out := []string{}
-	//l := len(b)
 	recentCheckpoint := 0
 	lastCheckpoint := 0
 	depth := s.Dict.Depth()
@@ -173,45 +171,30 @@ func (s *Seg) segmentThaiLongest(t string) []string {
 	l := len(cluster)
 
 	for cursor := 0; cursor < l; cursor++ {
-		c := cluster[cursor] //string(b[cursor])
+		c := cluster[cursor]
 
 		buf.WriteString(c)
-		bufsize += len(c)
+		bufsize += len([]rune(c))
 
-		if bufsize <= depth {
-			if s.Dict.Has(buf.String()) {
-				recentCheckpoint = cursor
-			}
-
-			if cursor >= l-1 {
-				if recentCheckpoint <= lastCheckpoint {
-					recentCheckpoint = cursor
-				}
-				goto flushBuffer
-			}
-
-			continue
-		} else {
-			if recentCheckpoint > lastCheckpoint {
-				goto flushBuffer
-			}
-
+		// if bufsize > depth, it is 100% not in the dictionary
+		if bufsize <= depth && s.Dict.Has(buf.String()) {
 			recentCheckpoint = cursor
-
-			if cursor >= l-1 {
-				goto flushBuffer
-			}
-
-			continue
 		}
 
-	flushBuffer:
-		w := strings.Join(cluster[lastCheckpoint:recentCheckpoint], "") //string(b[lastCheckpoint : recentCheckpoint+1])
-		out = append(out, w)
-		buf.Reset()
-		bufsize = 0
-		cursor = recentCheckpoint + 1
-		lastCheckpoint = recentCheckpoint
+		if cursor >= l-1 {
+			w := ""
+			if recentCheckpoint >= lastCheckpoint {
+				w = strings.Join(cluster[lastCheckpoint:recentCheckpoint+1], "")
+			} else {
+				w = strings.Join(cluster[lastCheckpoint:], "")
+				recentCheckpoint = cursor
+			}
+			out = append(out, w)
+			buf.Reset()
+			bufsize = 0
+			cursor = recentCheckpoint
+			lastCheckpoint = recentCheckpoint + 1
+		}
 	}
 
 	return out
@@ -240,7 +223,7 @@ func (s *Seg) createCluster(t string) []string {
 		}
 	}
 
-	return strings.Split(strings.Replace(buf.String(), " <", "", -1), " ")
+	return strings.Split(strings.Replace(strings.Replace(buf.String(), " <", "", -1), "<", "", -1), " ")
 }
 
 func (s *Seg) isInGroup(c string, g []string) bool {
